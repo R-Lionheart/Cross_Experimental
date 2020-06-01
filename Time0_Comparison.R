@@ -18,7 +18,8 @@ Time0 <- all.datasets %>%
 
 Eddy <- all.datasets %>%
   filter(Dataset == "Eddy_Transect") %>%
-  filter(str_detect(Replicate.Name, "MS6|MS12"))
+  filter(str_detect(Replicate.Name, "MS6|MS12")) %>%
+  filter(str_detect(Replicate.Name, "MS6C315m|MS12C115m"))
 
 
 Eddy_Time0 <- Time0 %>%
@@ -28,13 +29,15 @@ Eddy_Time0 <- Time0 %>%
   mutate(Average.Area = mean(Area.Value, na.rm = TRUE)) %>%
   mutate(Cyclone = ifelse(str_detect(SampID, "MS12|IL1"), 
                           "Cyclonic", "Anticyclonic")) %>%
+  mutate(Size.Fraction = ifelse(Dataset == "B12_Incubation" & str_detect(SampID, "5um"), "5um_SizeFraction", 
+                                ifelse(Dataset == "B12_Incubation" & !str_detect(SampID, "5um"), "0.2_SizeFraction", "Transect"))) %>%
   group_by(Metabolite.name) %>%
   filter(!length(unique(Dataset)) < 2) %>%
   filter(Metabolite.name %in% compounds) %>%
-  select(Metabolite.name, SampID, Dataset, Cyclone, Average.Area) %>%
+  select(Metabolite.name, SampID, Dataset, Cyclone, Size.Fraction, Average.Area) %>%
   unique()
 
-ggplot(data = Eddy_Time0, aes(x = Dataset, y = Average.Area, fill = Metabolite.name)) +
+ggplot(data = Eddy_Time0, aes(x = Size.Fraction, y = Average.Area, fill = Metabolite.name)) +
   geom_bar(stat = "identity") +
   facet_wrap(~Cyclone) +
   ggtitle("B12 Incubation T0 and Eddy Transect Comparison")
