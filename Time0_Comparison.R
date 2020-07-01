@@ -3,7 +3,7 @@
 library(tidyverse)
 library(vegan)
 
-all.datasets <- read.csv("data_processed/MSDial_B12_Transect_combined_2020-05-11.csv", stringsAsFactors = FALSE) %>%
+all.datasets <- read.csv("data_processed/MSDial_B12_Transect_combined_2020-06-16.csv", stringsAsFactors = FALSE) %>%
   select(Metabolite.name, Replicate.Name, Column, Dataset, Area.Value) %>%
   filter(!str_detect(Replicate.Name,
                      "ProcessBlk|Sept29QC|TruePooWeek1|TruePooWeek2|TruePooWeek3|TruePooWeek4|DSW700m|Std|Blk")) %>%
@@ -42,7 +42,20 @@ ggplot(data = Eddy_Time0, aes(x = Size.Fraction, y = Average.Area, fill = Metabo
   facet_wrap(~Cyclone) +
   ggtitle("B12 Incubation T0 and Eddy Transect Comparison")
 
-## Normaliztion
+# With error bars
+Eddy_Time0_Anticyclonic <- Eddy_Time0 %>%
+  filter(Cyclone = "Anticyclonic")
+Eddy_Time0_Cyclonic <- Eddy_Time0 %>%
+  filter(Cyclone = "Cyclonic")
+
+ggplot(Eddy_Time0_Anticyclonic, aes(Size.Fraction, Average.Area, fill= Metabolite.name)) +
+  stat_summary(geom = "bar", fun.y = mean, position = "dodge") +
+  stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge") +
+  ggtitle("B12 Incubation T0 and Eddy Transect Comparison")
+
+
+
+## Normalization
 Eddy_Time0_normalized <- Eddy_Time0 %>%
   select(-Dataset, -Cyclone) %>%
   pivot_wider(names_from = Metabolite.name, values_from = Average.Area)
